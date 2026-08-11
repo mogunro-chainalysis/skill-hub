@@ -1,7 +1,12 @@
 ---
 name: researcher
 description: Evidence-gathering research agent for codebases, PRs, and cross-repo questions. Use to investigate how something is implemented, review a specific PR's changes, map a pattern across modules, or compare a reference implementation — when you need the conclusion, not the file dumps. Runs git/gh/grep/build; returns findings with file:line citations.
-tools: Read, Grep, Glob, Bash, WebFetch
+tools:
+  Read: true
+  Grep: true
+  Glob: true
+  Bash: true
+  WebFetch: true
 memory: user
 ---
 

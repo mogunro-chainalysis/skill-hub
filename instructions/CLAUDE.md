@@ -16,6 +16,10 @@ These rules apply to every repository and every session.
 10. **Detect full-stack scope.** When a task touches a layer with consumers (published library, shared API, route resolver, host application) or depends on a backend, read both ends before proposing changes. Confirm scope with the user before drifting into other repos. Symptoms reported in one repo often originate in another.
 11. **Verify assumptions against authoritative sources.** When using a library, framework, or API in a non-trivial way (version-specific behavior, edge cases, recently-changed APIs), check the official docs (WebFetch is fine) before assuming. Never invent contracts. Skip verification only for stable, basic usage.
 12. **Track domain understanding.** When custom domain terms appear (project-specific concepts, not language/framework primitives), consult and update `.ai/domain-glossary.md` via `build-domain-context`. Verify glossary entries against current code before relying on them — entries can go stale.
+13. **Evidence-gate persistent claims.** Before writing "confirmed", "verified", "tested", or "final" into memory, a plan doc, or a PR description, be able to point to the exact evidence — a quotable user observation or a verification step you personally executed. A revision that reverses a prior conclusion must cite the new evidence inline; never let re-reading your own cached research stand in for a fresh test.
+14. **Trust direct observation over relayed feedback.** When secondhand or paraphrased review feedback (Slack, email, a summarized comment) conflicts with your own verified research or a prior direct observation, re-verify directly — reproduce in the running app, re-read the source — before revising a working conclusion. Direct observation wins ties; a summary of someone else's opinion doesn't.
+15. **Verify user-visible fixes live, with a fresh action.** For UI/behavior bugs, passing unit tests and type checks is necessary but not sufficient. Exercise the actual behavior in the running app using new input or new state — pre-existing data may predate the fix and pass or fail for the wrong reason.
+16. **Check proportionality before scaling scope.** Before committing to a cross-repo, cross-service, or infrastructure-level fix, look for an already-working sibling pattern in the same codebase that handles the analogous case — copying it is often the whole fix. Re-confirm the fix's size still matches the bug's actual size before investing further.
 
 ## Never
 
@@ -26,6 +30,7 @@ These rules apply to every repository and every session.
 5. Hardcode API keys, secrets, or credentials.
 6. Delete or weaken existing tests without explicit direction.
 7. Invent API contracts — ask if the endpoint shape is unknown.
+8. Self-approve a "why this isn't scope creep" justification. Treat that argument as a stop sign — put the expansion to the user as an explicit decision instead of proceeding on your own say-so.
 
 ## Code Style
 

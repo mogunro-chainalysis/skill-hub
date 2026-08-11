@@ -17,7 +17,7 @@ A PR review is a quality gate to catch bugs, maintainability problems, and perfo
    git diff main...HEAD
    ```
 
-3. **Verify locally** for changes to shared contracts or complex logic. Read the surrounding files and the referenced source of truth (upstream repo, spec, docs) rather than trusting the PR description.
+3. **Verify locally** for changes to shared contracts or complex logic. Read the surrounding files and the referenced source of truth (upstream repo, spec, docs) rather than trusting the PR description. Treat any "confirmed/verified by testing" claim in the PR description or a linked plan/memory doc as a claim, not a fact, until it traces to a quoted observation or a repro you can perform yourself.
 
 4. **Size gate.**
    - **Over 400 lines**: ❌ Blocker. Recommend splitting before review.
@@ -43,12 +43,14 @@ A PR review is a quality gate to catch bugs, maintainability problems, and perfo
    - Follow existing repo patterns?
    - Appropriate abstraction level?
    - Solved at the right boundary?
+   - **Proportionality.** Does the solution's blast radius (new published API, cross-repo change, infra/DB work) match the bug's actual size? If a narrower same-repo fix — especially copying an already-working sibling pattern — looks possible, flag the oversized solution and ask whether it was considered.
 
 10. **Test coverage.**
     - New features covered?
     - Edge cases tested?
     - **Useful, not just present?** Judge new tests against `write-tests` — flag any that assert on mocks, chase coverage, or restate the implementation.
     - **Missing tests on new behaviour = ❌ Request Changes.**
+    - **Verification discipline.** For bug fixes affecting user-visible/UI behavior, confirm the fix was exercised with fresh state in the running app — not just pre-existing data, which may predate the fix and pass or fail for the wrong reason. Unit/type checks alone are not sufficient evidence.
 
 11. **Performance.**
     Flag re-renders, N+1 patterns, memory leaks, or expensive computations in render.

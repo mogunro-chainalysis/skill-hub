@@ -21,6 +21,7 @@ description: Create a file-level implementation plan for a single pull request.
 
    **Research gates — run before listing file changes:**
    - **Stack scope.** If this PR touches a published interface or API contract, read both ends (consumer + provider) before planning.
+   - **Proportionality check.** Before scoping cross-repo or infra-level work, check whether an already-working sibling component or pattern in this repo solves the equivalent case — copying it may eliminate the need to expand scope at all.
    - **Existing-helper sweep.** Before planning any new shared utility, invoke `determine-patterns` step 5 — grep for verbs and nouns from the task.
    - **Domain glossary.** If custom domain terms appear, invoke `build-domain-context`.
    - **Doc verification.** If using a library feature in a non-trivial way, check the official docs.

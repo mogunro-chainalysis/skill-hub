@@ -20,12 +20,13 @@ No code is written before this document exists and is reviewed. The goal is to s
 
    **Research gates:**
    - **Stack scope.** Check boundaries and cross-repo impact.
+   - **Proportionality check.** Look for an already-working sibling feature that handles the analogous case — its pattern is often the cheapest correct option and anchors the option space below.
    - **Existing-helper sweep.** Confirm if helpers already exist for proposed behavior.
    - **Domain glossary.** Verify custom terms in `.ai/domain-glossary.md`.
    - **Doc verification.** Verify library behavior against official docs.
 
 3. **Identify the option space.**
-   List at least two plausible approaches with tradeoffs.
+   List at least two plausible approaches with tradeoffs. If the leading option requires cross-repo, published-API, or infra/DB changes, explicitly note whether a narrower same-repo option (e.g. mirroring an existing working sibling) was considered and why it was ruled out — don't skip straight to the heavier option.
 
 4. **Recommend an approach.**
    Choose one and explain rationale.

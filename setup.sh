@@ -11,6 +11,7 @@ AGENTS_HOME="$HOME/.agents"
 SKILLS_DIR="$AGENTS_HOME/skills"
 INSTRUCTIONS_DIR="$AGENTS_HOME/instructions"
 AGENTS_DIR="$AGENTS_HOME/agents"
+COMMANDS_DIR="$AGENTS_HOME/commands"
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -171,6 +172,22 @@ fi
 if [ -d "$AGENTS_DIR/codex" ]; then
   symlink_dir "$AGENTS_DIR/codex" "$HOME/.codex/agents" \
     "Codex CLI    ~/.codex/agents/"
+fi
+
+# ============================================================================
+# 4. COMMANDS — Symlink global command definitions (opencode only)
+# ============================================================================
+
+echo ""
+info "Setting up global commands symlinks..."
+echo ""
+
+# OpenCode commands: ~/.config/opencode/commands/ → ~/.agents/commands/
+# Claude Code slash-command frontmatter differs and isn't wired here — commands
+# are opencode-specific for now (Task tool / @mention / Tab primary-agent mechanics).
+if [ -d "$COMMANDS_DIR" ]; then
+  symlink_dir "$COMMANDS_DIR" "$HOME/.config/opencode/commands" \
+    "OpenCode     ~/.config/opencode/commands/"
 fi
 
 # ============================================================================
