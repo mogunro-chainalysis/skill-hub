@@ -41,19 +41,20 @@ A PR review is a quality gate to catch bugs, maintainability problems, and perfo
 
 9. **Architecture and patterns.**
    - Follow existing repo patterns?
-   - Appropriate abstraction level?
+   - **Complexity & YAGNI.** Did the PR introduce speculative abstractions, unnecessary interfaces, or extra wrapper layers? Enforce simplest maintainable design.
+   - **DRYness.** Did the PR reinvent utilities, helpers, or components that already exist elsewhere in the codebase?
    - Solved at the right boundary?
    - **Proportionality.** Does the solution's blast radius (new published API, cross-repo change, infra/DB work) match the bug's actual size? If a narrower same-repo fix — especially copying an already-working sibling pattern — looks possible, flag the oversized solution and ask whether it was considered.
 
 10. **Test coverage.**
-    - New features covered?
-    - Edge cases tested?
-    - **Useful, not just present?** Judge new tests against `write-tests` — flag any that assert on mocks, chase coverage, or restate the implementation.
+    - User flows and system stability covered?
+    - Edge cases and error recovery tested?
+    - **Useful, not just present?** Judge new tests against `write-tests` — flag test fluff, mock-only verifications, or tests that restate the implementation.
     - **Missing tests on new behaviour = ❌ Request Changes.**
     - **Verification discipline.** For bug fixes affecting user-visible/UI behavior, confirm the fix was exercised with fresh state in the running app — not just pre-existing data, which may predate the fix and pass or fail for the wrong reason. Unit/type checks alone are not sufficient evidence.
 
 11. **Performance.**
-    Flag re-renders, N+1 patterns, memory leaks, or expensive computations in render.
+    Flag re-renders, N+1 query patterns, memory leaks, unneeded allocations, or expensive computations on hot paths.
 
 12. **Code quality.**
     Invoke `check-code-cleanup`, `check-types`, `check-component-quality`, and `check-java-quality`.

@@ -31,7 +31,7 @@ Break this down into PRs:
 
 ## Phase 2: Stress-Test the Plan
 
-**Where**: Same agent or new session, same repo.
+**Where**: Same agent or new session, same repo. (*Model*: Switch to your reasoning/architecture model, e.g. `/model opus` or Tab to `plan`).
 
 ```
 Grill me on the plan in .ai/<task-slug>/ticket-plan.md
@@ -53,7 +53,7 @@ Grill me on the plan in .ai/<task-slug>/ticket-plan.md
 Read .ai/<task-slug>/ticket-plan.md and .ai/<task-slug>/decisions.md. Plan PR <N>.
 ```
 
-**What happens**: The agent runs `plan-pr` — traces code paths, finds patterns, lists every file to create/modify/delete, estimates size, and saves the plan to `.ai/<task-slug>/pr-<N>-plan.md`.
+**What happens**: The agent runs `plan-pr` — traces code paths, verifies existing helpers to ensure DRYness, applies YAGNI and evaluates complexity tradeoffs, assesses performance, plans lean functional tests for user flows and stability (ruling out test bloat), lists every file to create/modify/delete, estimates size, and saves the plan to `.ai/<task-slug>/pr-<N>-plan.md`.
 
 **You're done when**: `.ai/<task-slug>/pr-<N>-plan.md` exists with a file-level plan and implementation order.
 
@@ -61,13 +61,13 @@ Read .ai/<task-slug>/ticket-plan.md and .ai/<task-slug>/decisions.md. Plan PR <N
 
 ## Phase 4: Implement the PR
 
-**Where**: Any agent, in the repo where the PR will land.
+**Where**: Any agent, in the repo where the PR will land. (*Model*: Switch back to your implementation model, e.g. `/model sonnet` or Tab to `build`).
 
 ```
 Read .ai/<task-slug>/pr-<N>-plan.md, .ai/<task-slug>/decisions.md, and .ai/<task-slug>/ticket-plan.md. Implement the plan step by step, following the implementation order. Follow project conventions and existing patterns. Do not touch code outside the PR scope.
 ```
 
-**What happens**: The agent writes code following the plan. It should follow the implementation order, use the project's conventions, and stay within scope.
+**What happens**: The agent writes code following the plan. It reuses existing utilities (DRY), keeps implementations performant and simple (YAGNI), and writes high-signal functional tests covering real user flows and failure stability without adding test bloat. It should follow the implementation order, use the project's conventions, and stay within scope.
 
 **Course-correct if needed**:
 

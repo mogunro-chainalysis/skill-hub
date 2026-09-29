@@ -30,8 +30,8 @@ specific, actionable feedback organized by severity.
 ## Output Format
 
 Group findings by severity:
-- **🔴 Must Fix**: Bugs, security issues, broken tests, PR over 600 lines
-- **🟡 Should Fix**: Type safety, anti-patterns, readability, PR 400–600 lines
+- **🔴 Must Fix**: Bugs, security issues, broken tests, severe performance regressions (N+1 queries, memory leaks), PR over 600 lines
+- **🟡 Should Fix**: Type safety, anti-patterns, readability, PR 400–600 lines, YAGNI violations / unnecessary abstractions, duplicate logic that should be DRY, test bloat / useless mock-only tests
 - **🟢 Consider**: Style suggestions, minor improvements
 
 End with a summary: total issues by severity, lines changed, and an overall verdict (✅ Ready / ⚠️ Needs fixes).

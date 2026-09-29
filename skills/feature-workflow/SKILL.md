@@ -1,31 +1,38 @@
 ---
 name: feature-workflow
-description: Orchestrate a feature from idea to reviewed PRs across six phases (research, grill, plan, split, implement, review), delegating background work to sub-agents and keeping decision points with the human. Use when taking on a non-trivial feature, migration, or cross-cutting change and you want a repeatable, context-efficient flow. Triggers: "run the full workflow", "research to review", "use the feature workflow", "orchestrate this feature".
+description: Orchestrate end-to-end feature delivery across research, grill, plan, split, implement, and review phases.
 ---
 
 # Feature Workflow
 
-Conductor for multi-phase feature delivery. This skill does **not** replace the phase skills — it
-sequences them, enforces the human gates, and encodes the sub-agent delegation discipline that keeps
-the main context small.
+Conductor for multi-phase feature delivery in a fully agentic software engineering flow. This skill
+sequences phases, enforces human gates, and directs sub-agents while keeping the main context lean.
 
 ## Core principles
 
-- **Delegate breadth, keep judgment.** Fan read-heavy, parallelizable work out to sub-agents; keep
-  interactive and decision work in the main session. A sub-agent returns a conclusion, not a file dump.
-- **Parallelize research.** Launch independent research sub-agents in a single message so they run
-  concurrently.
+- **Fully agentic execution, human-steered gates.** Delegate parallel research, implementation, and
+  code review to autonomous sub-agents; retain critical decisions, tradeoff evaluations, and phase gates
+  in the main session with the human.
+- **DRY via codebase research.** Always research existing codebase helpers, utilities, hooks, and
+  components before proposing or writing code. Reuse and extend existing patterns — never write parallel
+  implementations without proof that existing code cannot be reused.
+- **Complexity & YAGNI.** Weigh the benefits and drawbacks of different approaches before coding.
+  Reject speculative abstractions, premature generalization, and unnecessary wrapper layers. Choose the
+  simplest maintainable design that satisfies current requirements.
+- **Performance by design.** Proactively evaluate performance implications: render cycles, query
+  patterns (prevent N+1 queries), memory footprint, network roundtrips, and hot-path execution.
+- **Functional testing over bloat.** Prioritize high-signal functional tests that prove real user
+  flows and system stability under failure. Eliminate test fluff, coverage chasing, mock-only
+  verifications, and fragile micro-tests that merely restate implementation details.
+- **Delegate breadth, keep judgment.** Fan read-heavy, parallelizable work out to sub-agents. A
+  sub-agent returns a verified conclusion citing `file:line`, not a raw file dump.
 - **Persist state.** Write durable artifacts to `.ai/<task-slug>/` so work survives context
   compaction. One folder per task.
-- **Gate on the human.** Never auto-advance past a decision point (grill answers, plan approval,
-  split decision, commit/push).
-- **Sub-agents execute, not narrate.** Instruct every sub-agent to call tools and cite `file:line`,
-  never to describe what it is about to do. Prefer the `researcher` agent (or `general-purpose`) for
-  research that needs `git`/`gh`/grep/build; a purely read-only explorer can stall on shell tasks.
-- **Match model to phase.** Sub-agents (`Agent` tool `model` param) default to sonnet; use opus for
-  judgment-heavy work and haiku for narrow lookups — see the per-phase notes below. Switching the
-  *main session's* model mid-workflow (`/model <name>`) needs no re-reading: Claude Code carries the
-  full transcript to whichever model is active, so switch at the phase boundary and switch back after.
+- **Gate on the human.** Never auto-advance past a decision point (model switches, grill answers,
+  plan approval, split decision, commit/push).
+- **Mandatory model switch gates.** Because CLI agents cannot programmatically switch their own active
+  session model, the AI MUST explicitly stop and instruct the user to switch models at phase boundaries
+  and await confirmation before proceeding.
 
 ## Procedure
 
@@ -33,36 +40,64 @@ the main context small.
    the six phases. Read any existing `.ai/` context first.
 
 1. **Research (sub-agents, parallel).** *Model: sonnet default; haiku for a single narrow lookup.*
-   Identify the independent questions (e.g. "how is X done in this repo", "how does a reference PR do
-   it", "what does the upstream/consumer repo expect"). Spawn one sub-agent per question in a single
-   message. Each must run tools and report file paths + key lines, not summaries. Consolidate with
-   `determine-patterns`. Record findings.
+   Spawn independent research sub-agents in a single message:
+   - **DRY codebase sweep**: Search the repo for existing utilities, helpers, shared components, or
+     partially matching implementations.
+   - **Architecture & boundaries**: Check consumer/backend expectations and performance constraints.
+   - Consolidate patterns with `determine-patterns`. Each sub-agent reports file paths + key lines.
+     Record findings in `.ai/<task-slug>/research.md`.
 
-2. **Grill (main session).** *Model: switch to opus here for architecturally significant decisions
-   (`/model opus`) — no need to re-read anything, the transcript carries over.* Invoke `grill-me`
-   seeded with the research. Interview the human on every open decision branch — trust model, authz,
-   config shape, versions, test strategy, scope. Do this in the main session; never background it.
-   Write resolved decisions to `.ai/<task-slug>/decisions.md`. Re-reconcile the whole set whenever the
-   human changes their mind.
+---
+### 🛑 GATE: Switch to Architecture Model (Mandatory Pause)
+**Do NOT proceed to Phase 2 automatically.** An AI cannot change its own active session model. You MUST
+stop and output an explicit prompt to the human:
+> *"Research is complete. Please switch to your architecture/reasoning model now (e.g. run `/model opus` in Claude Code, or press `Tab` to select the `plan` agent in OpenCode). Reply when ready to begin the Grill phase."*
+Wait for the user's explicit confirmation before starting Phase 2.
+---
 
-3. **Plan.** *Model: stay on opus.* Optionally run `tech-design` for approach tradeoffs and
-   `decompose-ticket` for subtasks, then `plan-pr` for a file-by-file plan. Keep it in the main session
-   and get explicit approval. Persist to `.ai/<task-slug>/pr-<N>-plan.md`.
+2. **Grill (main session).** *Active model: opus / reasoning agent.*
+   Invoke `grill-me` seeded with research findings. Interview the human on:
+   - **Complexity & YAGNI**: What is the minimal sufficient solution? Can any speculative layer be cut?
+   - **Approach tradeoffs**: Explicitly weigh drawbacks and benefits of alternative designs.
+   - **Performance constraints**: Latency, scale, memory, and hot paths.
+   - **Test strategy**: Which user flows and stability guarantees matter? Explicitly rule out fluff/bloat.
+   - Persist resolved decisions to `.ai/<task-slug>/decisions.md`.
+
+3. **Plan.** *Active model: opus / reasoning agent.* Run `tech-design` for tradeoff analysis and `plan-pr` for a
+   file-by-file plan:
+   - Apply YAGNI: reject speculative abstractions or extra wrapper layers.
+   - Guarantee DRY: confirm planned code reuses discovered utilities.
+   - Address performance: evaluate computational complexity, query efficiency, and state management.
+   - Design functional tests: focus on user journeys and error stability; forbid useless unit test bloat.
+   - Get explicit human approval. Persist to `.ai/<task-slug>/pr-<N>-plan.md`.
 
 4. **Split (gate).** If the work exceeds ~400 lines / 8 hours or spans independent concerns, run
-   `split-pr` to break it into sequential, independently reviewable PRs. Confirm the split with the
-   human before implementing. Small changes skip this — say so and move on.
+   `split-pr` to create sequential, independently reviewable PRs. Confirm split with the human. Small
+   changes skip this — note and proceed.
 
-5. **Implement.** *Model: switch back to sonnet before spawning implement sub-agents (`/model sonnet`).*
-   One sub-agent per split PR / independent task. Sub-agents follow the plan and repo conventions, run
-   the formatter and tests, and report changes + deviations. Use worktree isolation when parallel
-   agents would touch the same files. Do serial/same-file work in the main session. Update
-   `progress.md` as steps complete.
+---
+### 🛑 GATE: Switch to Implementation Model (Mandatory Pause)
+**Do NOT begin implementation on the reasoning model.** After planning and splitting are approved, you
+MUST stop and output an explicit prompt to the human:
+> *"Architecture and planning are approved. Please switch back to your faster/implementation model now (e.g. run `/model sonnet` in Claude Code, or press `Tab` to select the `build` agent in OpenCode). Reply when ready to begin implementation."*
+Wait for the user's explicit confirmation before starting Phase 5.
+---
 
-6. **Review.** *Model: opus for high-stakes diffs (security, architecture-changing); sonnet for
-   routine PRs.* Run a review sub-agent (`code-reviewer` or `general-purpose`) and/or `review-pr`
-   against the reference. Then `prepare-pr` to package. **Do not commit or push without an explicit
-   request**; if on the default branch or a mismatched branch, branch first and confirm the target.
+5. **Implement.** *Active model: sonnet / build agent.*
+   One sub-agent per split PR / task. Sub-agents follow the plan:
+   - Reuse existing helpers (DRY) and follow repo patterns.
+   - Implement performant, maintainable logic without speculative complexity.
+   - Write functional tests proving user flows and stability. Stop when behavior is proven; do NOT add
+     filler tests for trivial getters, framework wiring, or mock verifications.
+   - Run formatters, linters, type checks, and tests. Report changes and update `progress.md`.
+
+6. **Review.** *Model: opus for high-stakes/architectural diffs; sonnet for routine PRs.*
+   Run review sub-agent (`code-reviewer`) and/or `review-pr` against the diff:
+   - Audit for YAGNI, complexity, and unnecessary abstractions.
+   - Audit for DRYness: flag duplicate logic that could use existing helpers.
+   - Audit for performance: flag unnecessary renders, N+1 queries, memory leaks.
+   - Audit tests: flag test fluff, mock-only assertions, or bloat that doesn't test real user flows/stability.
+   - Run `prepare-pr` to package. **Do not commit or push without explicit user request.**
 
 ## Notes
 

@@ -22,23 +22,24 @@ description: Create a file-level implementation plan for a single pull request.
    **Research gates — run before listing file changes:**
    - **Stack scope.** If this PR touches a published interface or API contract, read both ends (consumer + provider) before planning.
    - **Proportionality check.** Before scoping cross-repo or infra-level work, check whether an already-working sibling component or pattern in this repo solves the equivalent case — copying it may eliminate the need to expand scope at all.
-   - **Existing-helper sweep.** Before planning any new shared utility, invoke `determine-patterns` step 5 — grep for verbs and nouns from the task.
-   - **Domain glossary.** If custom domain terms appear, invoke `build-domain-context`.
-   - **Doc verification.** If using a library feature in a non-trivial way, check the official docs.
+    - **Existing-helper sweep (DRY).** Before planning any new shared utility, component, or helper, invoke `determine-patterns` step 5 — grep for verbs and nouns from the task to enforce DRY. Reusing or extending existing code is required; never add parallel implementations without proof.
+    - **Domain glossary.** If custom domain terms appear, invoke `build-domain-context`.
+    - **Doc verification.** If using a library feature in a non-trivial way, check the official docs.
 
-4. **Plan the test strategy explicitly.**
+4. **Plan the test strategy functionally (user flows & stability).**
    Define:
-   - **Unit tests**: isolate functions/hooks.
-   - **Integration tests**: verify cross-boundary behaviour.
-   - **Component tests**: verify rendered output/interaction.
-   - **Edge cases**: explicit test coverage.
-   - Prefer test-first for unit and integration work.
+   - **Functional tests**: primary user flows, state transitions, and error recovery.
+   - **Integration tests**: cross-boundary interactions and external collaborator contracts.
+   - **Unit tests**: reserve strictly for isolated, high-branch algorithmic logic.
+   - **Exclude test bloat**: explicitly rule out fluff, tests for trivial getters/setters/framework plumbing, and mock-only checks.
+   - Prefer test-first for functional and integration behaviors.
 
 5. **Check for observability needs.**
    Define logging/alerting for new error states or features.
 
-6. **Consider performance.**
-   Flag re-renders, N+1 patterns, expensive operations, memory leaks, or unnecessary network calls.
+6. **Consider performance and complexity (YAGNI).**
+   - **Complexity & YAGNI**: Weigh drawbacks and benefits of the approach. Strip speculative abstractions, unnecessary wrapper layers, and premature generalizations.
+   - **Performance**: Flag re-renders, N+1 query patterns, expensive operations, memory leaks, or unnecessary network calls.
 
 7. **List every file change.**
    - **Create**: new files with purpose/pattern.
@@ -72,17 +73,19 @@ description: Create a file-level implementation plan for a single pull request.
 ## Not in Scope
 <explicit exclusions>
 
-## Test Strategy
-- **Unit tests**: <what is covered>
-- **Integration tests**: <what is covered>
-- **Component tests**: <what is covered>
-- **Edge cases**: <explicit coverage>
+## Test Strategy (Functional & Lean)
+- **User flows & stability**: <key functional flows and failure modes covered>
+- **Integration tests**: <cross-boundary interactions covered>
+- **Unit tests**: <strictly pure algorithmic logic covered — or "none required">
+- **Excluded bloat**: <explicitly excluded trivial/mock-only tests>
 
 ## Observability
 <new logging or alerting needed — or "none">
 
-## Performance Considerations
-<any foreseeable rendering, network, or memory issues — or "none flagged">
+## Performance & Complexity (YAGNI)
+- **Tradeoffs**: <benefits vs drawbacks of chosen approach>
+- **YAGNI check**: <confirm no speculative abstractions or unneeded wrappers>
+- **Performance**: <any foreseeable rendering, query (N+1), or memory concerns — or "none flagged">
 
 ## File Changes
 

@@ -1,4 +1,5 @@
 .ai/
+uncommitted/
 *.jsonl
 *.log
 CHANGELOG.md
