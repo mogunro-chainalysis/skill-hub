@@ -1,0 +1,9 @@
+.ai/
+uncommitted/
+*.jsonl
+*.log
+CHANGELOG.md
+sessions/
+
+# personal learning notes
+skills/teach-me/learning-log/
