@@ -19,6 +19,7 @@ coding tools: **Claude Code**, **OpenCode**, **Codex CLI**, and **Goose**.
 │   ├── AGENTS.md                   ← Global rules (all tools)
 │   └── WORKFLOW.md                 ← Ticket-to-PR guide (reference, not loaded)
 ├── setup.sh                        ← Creates all symlinks
+├── vendor-skills.sh                ← Syncs pinned third-party skills into skills/
 ├── add-repo.sh                     ← Sets up a repo for cross-agent compatibility
 └── README.md                       ← This file
 ```
@@ -89,6 +90,26 @@ cp -r /tmp/mattpocock-skills/grill-me ~/.agents/skills/
 ```
 
 Skills installed to `~/.agents/skills/` are instantly available in ALL agents.
+
+### Vendored skills (pinned third-party)
+
+Third-party skills we want everywhere are vendored by `vendor-skills.sh`, which copies them
+verbatim from a pinned commit and writes a `VENDOR.md` (source, commit, license) beside each
+`SKILL.md`. Never edit a vendored skill in place; layer your own skill on top instead.
+
+| Skills | Source |
+|--------|--------|
+| `cypress-author`, `cypress-cloud-cli`, `cypress-docs`, `cypress-explain`, `cypress-tap` | [cypress-io/ai-toolkit](https://github.com/cypress-io/ai-toolkit) (MIT) — see the [Cypress AI Skills docs](https://docs.cypress.io/app/tooling/ai-skills) |
+
+```bash
+# Update: bump the commit in SOURCES, then
+~/.agents/vendor-skills.sh
+git -C ~/.agents diff -- skills/   # review upstream changes
+~/.agents/setup.sh                 # link any new skills
+```
+
+Prerequisites: `cypress-tap` needs Cypress 15.21+ and a running `cypress open` session;
+`cypress-cloud-cli` needs `npm i -g @cypress/cloud`, Node 22.21+, and `cy-cloud login`.
 
 ## Skill Format (agentskills.io standard)
 
